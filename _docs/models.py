@@ -1,10 +1,13 @@
 from django.db import models
-from users.models import CustomUser
+from django.conf import settings
 
 
 class Document(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="document")
     title = models.CharField(max_length=255)
-    content = models.TextField()
-    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="document")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    file = models.FileField(upload_to='documents/', null=True, blank=True)
+    description = models.TextField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
