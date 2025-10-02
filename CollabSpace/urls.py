@@ -12,6 +12,7 @@ urlpatterns = [
     path('login/', LoginAPI.as_view(), name='login'),
     path('api/', include('tasks.urls')),
     path('api/', include('_docs.urls')),
+    path('api/', include('collab.urls')),
 ] 
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
