@@ -67,4 +67,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
             workspace=workspace,
             sender=sender,
             message=message
-        )
+        )   
