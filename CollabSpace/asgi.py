@@ -1,16 +1,22 @@
-"""
-ASGI config for CollabSpace project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
-"""
-
 import os
-
+import django
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from django.urls import path
+from collab.consumers import ChatConsumer
+from channels.auth import AuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CollabSpace.settings')
+django.setup()
 
-application = get_asgi_application()
+ws_pattern = [
+    path("ws/chat/<int:workspace_id>/", ChatConsumer.as_asgi()),
+]
+
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(), # Handles normal HTTP requests
+    "websocket": AuthMiddlewareStack(
+        URLRouter(ws_pattern) # websocket routes
+    ),
+}) 
+
