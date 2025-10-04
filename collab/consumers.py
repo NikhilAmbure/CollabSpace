@@ -18,6 +18,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+        # history of chat
+        past_messages = await self.get_past_messages(self.workspace_id)
+        
+        messages_data = [
+            {
+                'sender': msg.sender.username,
+                'message': msg.message,
+                'created_at': str(msg.created_at)
+            }
+            for msg in past_messages
+        ]
+        
+        await self.send(text_data=json.dumps({
+            'type': 'past_messages',
+            'messages': messages_data
+        }))
+
     
     async def disconnect(self, code):
         await self.channel_layer.group_discard(
@@ -39,7 +56,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                'type': 'chat message', # this will must match with handler method --> chat_message
+                'type': 'chat_message', # this will must match with handler method --> chat_message
                 'message': message,
                 'sender': sender.username
             }
@@ -68,3 +85,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender=sender,
             message=message
         )   
+    
+    @sync_to_async
+    def get_past_messages(self, workspace_id):
+        return ChatMessage.objects.filter(workspace_id=workspace_id).order_by('created_at')[:50]
